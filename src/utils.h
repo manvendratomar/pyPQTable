@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <fstream>
 #include <time.h>
+#include <iterator>
 
 
 namespace pqtable {
@@ -23,57 +24,66 @@ namespace pqtable {
 //   std::vector<std::vector<float> > vecs = ReadTopN("data.fvecs", "fvecs", top_n);
 
 // Interface (abstract basic class) of iterative reader
-class I_ItrReader{
-public:
-    virtual ~I_ItrReader() {}
-    virtual bool IsEnd() = 0;
-    virtual std::vector<float> Next() = 0;
-};
+    class I_ItrReader {
+    public:
+        virtual ~I_ItrReader() {}
+
+        virtual bool IsEnd() = 0;
+
+        virtual std::vector<float> Next() = 0;
+    };
 
 // Iterative reader for fvec file
-class FvecsItrReader : I_ItrReader{
-public:
-    FvecsItrReader(std::string filename);
-    bool IsEnd();
-    std::vector<float> Next();
-private:
-    FvecsItrReader(); // prohibit default construct
-    std::ifstream ifs;
-    std::vector<float> vec; // store the next vec
-    bool eof_flag;
-};
+    class FvecsItrReader : public I_ItrReader {
+    public:
+        FvecsItrReader(std::string filename);
+
+        bool IsEnd();
+
+        std::vector<float> Next();
+
+    private:
+        FvecsItrReader(); // prohibit default construct
+        std::ifstream ifs;
+        std::vector<float> vec; // store the next vec
+    };
 
 // Iterative reader for bvec file
-class BvecsItrReader : I_ItrReader{
-public:
-    BvecsItrReader(std::string filename);
-    bool IsEnd();
-    std::vector<float> Next(); // Read bvec, but return vec<float>
-private:
-    BvecsItrReader(); // prohibit default construct
-    std::ifstream ifs;
-    std::vector<float> vec; // store the next vec
-    bool eof_flag;
-};
+    class BvecsItrReader : public I_ItrReader {
+    public:
+        BvecsItrReader(std::string filename);
+
+        bool IsEnd();
+
+        std::vector<float> Next(); // Read bvec, but return vec<float>
+    private:
+        BvecsItrReader(); // prohibit default construct
+        std::ifstream ifs;
+        std::vector<float> vec; // store the next vec
+        bool eof_flag;
+    };
 
 // Proxy class
-class ItrReader{
-public:
-    // ext must be "fvecs" or "bvecs"
-    ItrReader(std::string filename, std::string ext);
-    ~ItrReader();
+    class ItrReader {
+    public:
+        // ext must be "fvecs" or "bvecs"
+        ItrReader(std::string filename, std::string ext);
 
-    bool IsEnd();
-    std::vector<float> Next();
+        ~ItrReader();
 
-private:
-    ItrReader();
-    I_ItrReader *m_reader;
-};
+        bool IsEnd();
+
+        std::vector<float> Next();
+
+    private:
+        ItrReader();
+
+        I_ItrReader *m_reader;
+    };
 
 // Wrapper. Read top-N vectors
 // If top_n = -1, then read all vectors
-std::vector<std::vector<float> > ReadTopN(std::string filename, std::string ext, int top_n = -1);
+    std::vector<std::vector<float> > ReadTopN(std::string filename, std::string ext, int top_n = -1);
 
 
 
@@ -86,16 +96,14 @@ std::vector<std::vector<float> > ReadTopN(std::string filename, std::string ext,
 //   /* do something */
 //   std::cout << Elapsed() - t0 << " [sec]" << std::endl;
 
-double Elapsed();
-
-
+    double Elapsed();
 
 
 // Output scores
 // scores[q][k]: k-th score of q-th query, where each score is pair<int, float>.
 // score[q][k].first: id,   score[q][k].second: distance
-void WriteScores(std::string path,
-                 const std::vector<std::vector<std::pair<int, float> > > &scores);
+    void WriteScores(std::string path,
+                     const std::vector<std::vector<std::pair<int, float> > > &scores);
 
 
 }

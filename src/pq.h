@@ -32,39 +32,42 @@ namespace pqtable {
 // The size of "code.bin" is the ideal size + 8 bytes (we record N and D),
 // e.g., if N=10^9 and D=4, then code.bin will be 4,000,000,008 bytes.
 
-class UcharVecs{
-public:
-    UcharVecs() : m_N(0), m_D(0) {}   // Space is not allocated. You need to call Resize first
-    UcharVecs(int N, int D) { Resize(N, D); }  // Space is allocated
-    UcharVecs(const std::vector<std::vector<uchar> > &vec);  // vec<vec<uchar>> -> UcharVecs
+    class UcharVecs {
+    public:
+        UcharVecs() : m_N(0), m_D(0) {}   // Space is not allocated. You need to call Resize first
+        UcharVecs(int N, int D) { Resize(N, D); }  // Space is allocated
+        UcharVecs(const std::vector<std::vector<uchar> > &vec);  // vec<vec<uchar>> -> UcharVecs
 
-    void Resize(int N, int D); // After resized, the old values are remained
+        void Resize(int N, int D); // After resized, the old values are remained
 
-    // Getter
-    const uchar &GetVal(int n, int d) const;     // n-th vec, d-th dim
-    std::vector<uchar> GetVec(int n) const;     // n-th vec
+        // Getter
+        const uchar &GetVal(int n, int d) const;     // n-th vec, d-th dim
+        std::vector<uchar> GetVec(int n) const;     // n-th vec
 
-    // Setter
-    void SetVal(int n, int d, uchar val);
-    void SetVec(int n, const std::vector<uchar> &vec);
+        // Setter
+        void SetVal(int n, int d, uchar val);
 
-    // IO
-    static void Write(std::string path, const UcharVecs &vecs);
-    static void Read(std::string path, UcharVecs *vecs, int top_n = -1); // Read top_n codes. if top_n==-1, read all
-    static UcharVecs Read(std::string path, int top_n = -1); // wrapper.
+        void SetVec(int n, const std::vector<uchar> &vec);
 
-    // Be careful
-    const uchar *RawDataPtr() const {return m_data.data();}
+        // IO
+        static void Write(std::string path, const UcharVecs &vecs);
 
-    int Size() const {return m_N;}
-    int Dim() const {return m_D;}
+        static void Read(std::string path, UcharVecs *vecs, int top_n = -1); // Read top_n codes. if top_n==-1, read all
+        static UcharVecs Read(std::string path, int top_n = -1); // wrapper.
 
-private:
-    int m_N;
-    int m_D;
-    std::vector<uchar> m_data; // a long array
+        // Be careful
+        const uchar *RawDataPtr() const { return m_data.data(); }
 
-};
+        int Size() const { return m_N; }
+
+        int Dim() const { return m_D; }
+
+    private:
+        int m_N;
+        int m_D;
+        std::vector<uchar> m_data; // a long array
+
+    };
 
 
 // Product quantization class
@@ -94,67 +97,75 @@ private:
 //   PQ pq(codewords);
 //   /* then you can use pq */
 
-class PQ
-{
-public:
-    // for convinience, rename vec<vec<float>> as Array
-    typedef std::vector<std::vector<float> > Array;
+    class PQ {
+    public:
+        // for convinience, rename vec<vec<float>> as Array
+        typedef std::vector<std::vector<float> > Array;
 
-    // codewords[m][ks][ds] : m-th subspace, ks-th codeword, ds-th element
-    PQ(const std::vector<Array> &codewords);
+        // codewords[m][ks][ds] : m-th subspace, ks-th codeword, ds-th element
+        PQ(const std::vector<Array> &codewords);
 
-    static std::vector<Array> Learn(const std::vector<std::vector<float> > &vecs,
-                                    int M, int Ks = 256);
-    static std::vector<Array> Learn(const cv::Mat &vecs_cvmat, // a vec per row
-                                    int M, int Ks = 256);
+        static std::vector<Array> Learn(const std::vector<std::vector<float> > &vecs,
+                                        int M, int Ks = 256);
+
+        static std::vector<Array> Learn(const cv::Mat &vecs_cvmat, // a vec per row
+                                        int M, int Ks = 256);
 
     // Give a vector, encode it
     std::vector<uchar> Encode(const std::vector<float> &vec) const;
     UcharVecs Encode(const std::vector<std::vector<float> > &vecs) const;  // Encode several vectors at once
 
-    // Given a PQ code, decode it
-    std::vector<float> Decode(const std::vector<uchar> &code) const;
-    std::vector<std::vector<float> > Decode(const UcharVecs &codes) const;  // Decode several codes at once
+        // Given a PQ code, decode it
+        std::vector<float> Decode(const std::vector<uchar> &code) const;
 
-    // dtable[m][ks] : the distance between m-th subspace, ks-th codeword
-    Array DTable(const std::vector<float> &query) const;
+        std::vector<std::vector<float> > Decode(const UcharVecs &codes) const;  // Decode several codes at once
 
-    // Give a DTable and PQ codes, compute an asymmetric distance
-    float AD(const Array &dtable, const std::vector<uchar> &code) const;
-    std::vector<float> AD(const Array &dtable,
-                          const UcharVecs &codes) const;
-    float AD(const Array &dtable, const UcharVecs &codes, int n) const; // Fast impl
+        // dtable[m][ks] : the distance between m-th subspace, ks-th codeword
+        Array DTable(const std::vector<float> &query) const;
 
-    // Just sort results
-    static std::vector<std::pair<int, float> > Sort(const std::vector<float> &dists, int top_k = -1); // if top_k == -1, sort all
+        // Give a DTable and PQ codes, compute an asymmetric distance
+        float AD(const Array &dtable, const std::vector<uchar> &code) const;
 
-    // Getter
-    const int &GetM() const {return m_M;}
-    const int &GetDs() const {return m_Ds;}
-    const int &GetKs() const {return m_Ks;}
-    const std::vector<Array> &GetCodewords() const {return m_codewords;}
+        std::vector<float> AD(const Array &dtable,
+                              const UcharVecs &codes) const;
 
-    // IO funcs
-    static void WriteCodewords(std::string file_path, const std::vector<Array> &codewords);
-    static std::vector<Array> ReadCodewords(std::string file_path);
+        float AD(const Array &dtable, const UcharVecs &codes, int n) const; // Fast impl
 
+        // Just sort results
+        static std::vector<std::pair<int, float> >
+        Sort(const std::vector<float> &dists, int top_k = -1); // if top_k == -1, sort all
 
-    // Utility functions. Array <-> cv::Mat
-    // array[n][i] <-> mat.at<float>(n, i)
-    static cv::Mat ArrayToMat(const Array &array);
-    static Array MatToArray(const cv::Mat &mat);
+        // Getter
+        const int &GetM() const { return m_M; }
 
-private:
-    //int m_D;   // e.g., m_D = 128 (SIFT)
-    int m_M;   // e.g., m_M = 4 (a SIFT feature is divided into 4 parts)
-    int m_Ds;  // e.g., m_Ds = 32 (m_Ds = m_D / m_M)
-    int m_Ks;  // e..g, m_Ks = 256
+        const int &GetDs() const { return m_Ds; }
 
-    std::vector<Array> m_codewords; // [ns][ks][ds]
+        const int &GetKs() const { return m_Ks; }
+
+        const std::vector<Array> &GetCodewords() const { return m_codewords; }
+
+        // IO funcs
+        static void WriteCodewords(std::string file_path, const std::vector<Array> &codewords);
+
+        static std::vector<Array> ReadCodewords(std::string file_path);
 
 
-};
+        // Utility functions. Array <-> cv::Mat
+        // array[n][i] <-> mat.at<float>(n, i)
+        static cv::Mat ArrayToMat(const Array &array);
 
+        static Array MatToArray(const cv::Mat &mat);
+
+    private:
+        //int m_D;   // e.g., m_D = 128 (SIFT)
+        int m_M;   // e.g., m_M = 4 (a SIFT feature is divided into 4 parts)
+        int m_Ds;  // e.g., m_Ds = 32 (m_Ds = m_D / m_M)
+        int m_Ks;  // e..g, m_Ks = 256
+
+        std::vector<Array> m_codewords; // [ns][ks][ds]
+
+
+    };
 
 
 }

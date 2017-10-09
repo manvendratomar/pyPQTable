@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(pqtable)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -c -std=c++11 -O3 -Wall")
 
 include_directories(src src/sparse_hashtable)
 

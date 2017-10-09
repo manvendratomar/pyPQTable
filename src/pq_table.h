@@ -54,7 +54,7 @@ public:
 
 
 
-class PQSingleTable: I_PQTable
+class PQSingleTable: public I_PQTable
 {
 public:
     PQSingleTable(const std::vector<PQ::Array> &codewords,
@@ -78,7 +78,7 @@ private:
 };
 
 
-class PQMultiTable: I_PQTable
+class PQMultiTable: public I_PQTable
 {
 public:
     PQMultiTable(const std::vector<PQ::Array> &codewords,

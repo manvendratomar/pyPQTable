@@ -7,26 +7,33 @@
 
 #include <opencv2/opencv.hpp>
 
+typedef unsigned int uint;
+
 namespace pqtable {
 
-class CodeToKey
-{
-public:
-    static void CodeToKey1(int M, const std::vector<uchar> &code, uint *key); // key should be uint key    (single var)
-    static void CodeToKey2(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[2] (array of uint)
-    static void CodeToKey4(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[4] (array of uint)
-    static void CodeToKey8(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[8] (array of uint)
+    class CodeToKey {
+    public:
+        static void
+        CodeToKey1(int M, const std::vector<uchar> &code, uint *key); // key should be uint key    (single var)
+        static void
+        CodeToKey2(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[2] (array of uint)
+        static void
+        CodeToKey4(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[4] (array of uint)
+        static void
+        CodeToKey8(int M, const std::vector<uchar> &code, uint *key); // key should be uint key[8] (array of uint)
 
 
-    // Given several uchar, compute a key
-    static uint Code1ToKey(const uchar &v1);
-    static uint Code2ToKey(const uchar &v1, const uchar &v2);
-    static uint Code4ToKey(const uchar &v1, const uchar &v2, const uchar &v3, const uchar &v4);
+        // Given several uchar, compute a key
+        static uint Code1ToKey(const uchar &v1);
 
-private:
-    CodeToKey(); // prohibit default constructing
+        static uint Code2ToKey(const uchar &v1, const uchar &v2);
 
-};
+        static uint Code4ToKey(const uchar &v1, const uchar &v2, const uchar &v3, const uchar &v4);
+
+    private:
+        CodeToKey(); // prohibit default constructing
+
+    };
 
 }
 
